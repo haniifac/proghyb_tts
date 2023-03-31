@@ -10,12 +10,12 @@ class CartArguments{
   CartArguments(this.cart);
 }
 
-List<DropdownMenuItem<String>> get dropdownItems{
-  List<DropdownMenuItem<String>> menuItems = [
-    DropdownMenuItem(child: Text("JNE"),value: "JNE"),
-    DropdownMenuItem(child: Text("TIKI"),value: "TIKI"),
-    DropdownMenuItem(child: Text("SiCepat"),value: "SiCepat"),
-    DropdownMenuItem(child: Text("JNT"),value: "JNT"),
+List<DropdownMenuItem<int>> get dropdownItems{
+  List<DropdownMenuItem<int>> menuItems = [
+    DropdownMenuItem(child: Text("JNE Rp1000"),value: 1000),
+    DropdownMenuItem(child: Text("TIKI Rp2000"),value: 2000),
+    DropdownMenuItem(child: Text("SiCepat Rp3000"),value: 3000),
+    DropdownMenuItem(child: Text("JNT Rp4000"),value: 4000),
   ];
   return menuItems;
 }
@@ -36,10 +36,11 @@ class _CartPageState extends State<CartPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackbar);
   }
 
-  String selectedKurir = "JNE";
+  int selectedKurir = 1000;
 
   HashMap subPrices = HashMap<String, double>();
   String subTotalString = "Rp0";
+  String grandTotalString = "Rp1000";
 
   updateText(String name, double newPrice) {
     setState(() {
@@ -53,6 +54,12 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
+  updateGrandtotalString(double newPrice) {
+    setState(() {
+      grandTotalString = "Rp${newPrice}";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var args = ModalRoute.of(context)!.settings.arguments as CartArguments;
@@ -63,7 +70,6 @@ class _CartPageState extends State<CartPage> {
       ),
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               height: 400,
@@ -104,6 +110,7 @@ class _CartPageState extends State<CartPage> {
 
                                     subTotal = countSubTotal(subPrices.values.toList());
                                     updateSubtotalString(subTotal);
+                                    updateGrandtotalString(subTotal + selectedKurir.toDouble());
 
                                     print(subPrices[args.cart[index].name].toString());
                                   },
@@ -124,18 +131,42 @@ class _CartPageState extends State<CartPage> {
                   }
               ),
             ),
-            Text("Shipping"),
-            DropdownButton(
-              value: selectedKurir,
-              onChanged: (String? newValue){
-                setState(() {
-                  selectedKurir = newValue!;
-                });
-              },
-              items: dropdownItems,
+            Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: 60),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Shipping"),
+                        DropdownButton(
+                          value: selectedKurir,
+                          onChanged: (int? newValue){
+                            setState(() {
+                              selectedKurir = newValue!;
+                              var subTotal = countSubTotal(subPrices.values.toList());
+                              updateGrandtotalString(subTotal + selectedKurir.toDouble());
+                            });
+                          },
+                          items: dropdownItems,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text("Sub Total"),
+                      Text("${subTotalString}"),
+                      Text("Grand Total"),
+                      Text("${grandTotalString}")
+                    ],
+                  )
+                ],
+              ),
             ),
-            Text("Sub Total"),
-            Text("Rp${subTotalString}")
           ],
         ),
       ),
