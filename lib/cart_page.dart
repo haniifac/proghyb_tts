@@ -39,10 +39,13 @@ class _CartPageState extends State<CartPage> {
   int selectedKurir = 1000;
 
   HashMap subPrices = HashMap<String, double>();
+  HashMap subBobot = HashMap<String, double>();
   String subTotalString = "Rp0";
   String grandTotalString = "Rp1000";
+  String totalBobotString = "0 KG";
+  String hargaTotalBobotString = "Rp0";
 
-  updateText(String name, double newPrice) {
+  updateSubProductString(String name, double newPrice) {
     setState(() {
       subPrices.update(name, (value) => newPrice);
     });
@@ -57,6 +60,18 @@ class _CartPageState extends State<CartPage> {
   updateGrandtotalString(double newPrice) {
     setState(() {
       grandTotalString = "Rp${newPrice}";
+    });
+  }
+
+  updateTotalBobotString(double newBobot) {
+    setState(() {
+      totalBobotString = "${newBobot} KG";
+    });
+  }
+
+  updateHargaPengirimanString(double newBobot) {
+    setState(() {
+      hargaTotalBobotString = "Rp${newBobot}";
     });
   }
 
@@ -99,18 +114,22 @@ class _CartPageState extends State<CartPage> {
                                   onChanged: (int value) {
                                     args.cart[index].qty = value;
 
-                                    double subTotal = args.cart[index].qty * args.cart[index].price;
-                                    subPrices.update(args.cart[index].name, (value) => subTotal, ifAbsent: () => subTotal);
-                                    updateText(args.cart[index].name, subTotal);
+                                    double subTotalProduct = args.cart[index].qty * args.cart[index].price;
+                                    subPrices.update(args.cart[index].name, (value) => subTotalProduct, ifAbsent: () => subTotalProduct);
 
-                                    // double countSubTotal = 0;
-                                    // for(var price in subPrices.values){
-                                    //   countSubTotal += price;
-                                    // }
 
-                                    subTotal = countSubTotal(subPrices.values.toList());
+                                    double productSubBobot = args.cart[index].qty.toDouble() * args.cart[index].weight;
+                                    subBobot.update(args.cart[index].name, (value) => productSubBobot, ifAbsent: () => productSubBobot);
+
+
+                                    var totalBobot = countSubBobotTotal(subBobot.values.toList());
+                                    var subTotal = countSubTotal(subPrices.values.toList());
+
+                                    updateSubProductString(args.cart[index].name, subTotalProduct);
+                                    updateTotalBobotString(countSubBobotTotal(subBobot.values.toList()));
                                     updateSubtotalString(subTotal);
-                                    updateGrandtotalString(subTotal + selectedKurir.toDouble());
+                                    updateHargaPengirimanString(totalBobot * selectedKurir);
+                                    updateGrandtotalString(subTotal + totalBobot * selectedKurir);
 
                                     print(subPrices[args.cart[index].name].toString());
                                   },
@@ -136,7 +155,7 @@ class _CartPageState extends State<CartPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    margin: EdgeInsets.only(right: 60),
+                    margin: EdgeInsets.only(right: 40),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -147,11 +166,15 @@ class _CartPageState extends State<CartPage> {
                             setState(() {
                               selectedKurir = newValue!;
                               var subTotal = countSubTotal(subPrices.values.toList());
+                              var totalBobot = countSubBobotTotal(subBobot.values.toList());
                               updateGrandtotalString(subTotal + selectedKurir.toDouble());
+                              updateHargaPengirimanString(totalBobot * selectedKurir);
+                              updateGrandtotalString(subTotal + totalBobot * selectedKurir);
                             });
                           },
                           items: dropdownItems,
                         ),
+                        Text("Total Bobot : $totalBobotString"),
                       ],
                     ),
                   ),
@@ -160,6 +183,8 @@ class _CartPageState extends State<CartPage> {
                     children: [
                       Text("Sub Total"),
                       Text("${subTotalString}"),
+                      Text("Harga Pengiriman"),
+                      Text("${hargaTotalBobotString}"),
                       Text("Grand Total"),
                       Text("${grandTotalString}")
                     ],

@@ -10,3 +10,13 @@ double countSubTotal(List<dynamic> theList){
 
   return thisSubTotal;
 }
+
+double countSubBobotTotal(List<dynamic> theList){
+  double thisSubBobot = 0;
+
+  for(var bobot in theList){
+    thisSubBobot += bobot;
+  }
+
+  return thisSubBobot;
+}
